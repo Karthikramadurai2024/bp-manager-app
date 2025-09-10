@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Partner Manager</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #f4f4f4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      width: 100%;
+      background: rgba(0,0,0,0.6);
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #00ffe7;
+      letter-spacing: 2px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 2rem; width: 100%; max-width: 1000px; }
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      margin: 1rem;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+    }
+    h2 { margin-bottom: 1rem; color: #00ffe7; }
+    label { display: block; margin-top: 1rem; font-weight: 500; }
+    input, select, button { margin-top: 0.5rem; padding: 0.7rem 1rem; border-radius: 10px; border: none; width: 100%; font-size: 1rem; }
+    input, select { background: rgba(255,255,255,0.1); color: #fff; }
+    input:focus, select:focus { outline: 2px solid #00ffe7; background: rgba(255,255,255,0.15); }
+    button {
+      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease;
+      margin-top: 1.5rem;
+    }
+    button:hover { transform: translateY(-3px); background: linear-gradient(90deg, #0072ff, #00c6ff); }
+    pre { background: rgba(0,0,0,0.6); padding: 1rem; border-radius: 10px; overflow-x: auto; max-height: 250px; white-space: pre-wrap; word-break: break-word; }
+    nav { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; }
+    nav button { width: auto; padding: 0.7rem 1.5rem; }
+    .hidden { display: none; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+  </style>
+</head>
+<body>
+  <header>Business Partner Manager</header>
+  <main>
+    <nav>
+      <button onclick="showSection('fetch')">Fetch BP</button>
+      <button onclick="showSection('create')">Create BP</button>
+    </nav>
+
+    <!-- Fetch Section -->
+    <section id="fetch" class="card">
+      <h2>Fetch Business Partner Details</h2>
+      <label>Customer ID:
+        <input type="text" id="customerId">
+      </label>
+      <button onclick="sendToCPI()">Send to CPI</button>
+      <h3>Response:</h3>
+      <pre id="response"></pre>
+    </section>
+
+    <!-- Create Section -->
+    <section id="create" class="card hidden">
+      <h2>Create Business Partner</h2>
+      <form id="bpForm" class="form-grid">
+        <label>Business Partner Type:
+          <select id="bpType" required>
+            <option value="person">Person</option>
+            <option value="organization">Organization</option>
+            <option value="group">Group</option>
+          </select>
+        </label>
+        <label>First Name:
+          <input type="text" id="firstName">
+        </label>
+        <label>Last Name:
+          <input type="text" id="lastName">
+        </label>
+        <label>Title:
+          <input type="text" id="title">
+        </label>
+        <label>Date of Birth:
+          <input type="date" id="dob">
+        </label>
+        <label>Gender:
+          <select id="gender">
+            <option value="">Select</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="O">Other</option>
+          </select>
+        </label>
+        <label>Email:
+          <input type="email" id="bpEmail" required>
+        </label>
+        <label>Phone Number:
+          <input type="tel" id="bpPhone" required>
+        </label>
+        <label>Street:
+          <input type="text" id="street" required>
+        </label>
+        <label>City:
+          <input type="text" id="city" required>
+        </label>
+        <label>Postal Code:
+          <input type="text" id="postalCode" required>
+        </label>
+        <label>Country:
+          <input type="text" id="bpCountry" required>
+        </label>
+        <label>Region/State:
+          <input type="text" id="region">
+        </label>
+        <label>Language:
+          <input type="text" id="language">
+        </label>
+        <label>Tax Number:
+          <input type="text" id="taxNumber">
+        </label>
+        <label>Company Code:
+          <input type="text" id="companyCode">
+        </label>
+        <label>Sales Organization:
+          <input type="text" id="salesOrg">
+        </label>
+        <label>Distribution Channel:
+          <input type="text" id="distChannel">
+        </label>
+        <label>Division:
+          <input type="text" id="division">
+        </label>
+        <label>Industry:
+          <input type="text" id="industry">
+        </label>
+      </form>
+      <button type="button" onclick="createBP()">Create Business Partner</button>
+      <h3>Response:</h3>
+      <pre id="createResponse"></pre>
+    </section>
+  </main>
+
+  <script>
+    function showSection(section) {
+      document.getElementById('fetch').classList.add('hidden');
+      document.getElementById('create').classList.add('hidden');
+      document.getElementById(section).classList.remove('hidden');
+    }
+
+    async function sendToCPI() {
+      const customerId = document.getElementById('customerId').value;
+      const payload = { customerId };
+      const url = "https://41a2517atrial-trial.integrationsuitetrial-apim.ap21.hana.ondemand.com/41a2517atrial/webpagetest";
+
+      try {
+        const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const result = await response.text();
+        document.getElementById('response').textContent = result;
+      } catch (err) {
+        document.getElementById('response').textContent = "Error: " + err.message;
+      }
+    }
+
+    async function createBP() {
+      const payload = {
+        bpType: document.getElementById('bpType').value,
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        title: document.getElementById('title').value,
+        dob: document.getElementById('dob').value,
+        gender: document.getElementById('gender').value,
+        bpEmail: document.getElementById('bpEmail').value,
+        bpPhone: document.getElementById('bpPhone').value,
+        street: document.getElementById('street').value,
+        city: document.getElementById('city').value,
+        postalCode: document.getElementById('postalCode').value,
+        bpCountry: document.getElementById('bpCountry').value,
+        region: document.getElementById('region').value,
+        language: document.getElementById('language').value,
+        taxNumber: document.getElementById('taxNumber').value,
+        companyCode: document.getElementById('companyCode').value,
+        salesOrg: document.getElementById('salesOrg').value,
+        distChannel: document.getElementById('distChannel').value,
+        division: document.getElementById('division').value,
+        industry: document.getElementById('industry').value
+      };
+
+      const url = "https://41a2517atrial-trial.integrationsuitetrial-apim.ap21.hana.ondemand.com/41a2517atrial/webpagetest";
+
+      try {
+        const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const result = await response.text();
+        document.getElementById('createResponse').textContent = result;
+      } catch (err) {
+        document.getElementById('createResponse').textContent = "Error: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
